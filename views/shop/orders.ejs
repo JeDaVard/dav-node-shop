@@ -1,9 +1,35 @@
 <%- include('../includes/head.ejs') %>
-    </head>
+<link rel="stylesheet" href="/css/order.css">
+</head>
 
-    <body>
-        <%- include('../includes/navigation.ejs') %>
-        <main>
-            <h1>Nothing there!</h1>
-        </main>
-        <%- include('../includes/end.ejs') %>
+<body>
+<%- include('../includes/navigation.ejs') %>
+<main>
+    <% if (orders.length <= 0) { %>
+        <h1>Nothing there!</h1>
+    <% } else { %>
+        <div>
+            <% orders.forEach(order => { %>
+                <div class="order">
+                    <div class="order__top">
+                        <div class="order__top-date">
+                            <%= new Date(order.createdAt).getTime() %>
+                        </div>
+                        <div class="order__top-id">
+                            Order ID: <%= order.id %>
+                        </div>
+                    </div>
+                    <div class="order__bottom">
+                        <% order.products.forEach(product => { %>
+                        <div class="order__bottom-order">
+                            <p><%= product.title %></p>
+                            <p><b><%= product.orderItem.quantity %></b></p>
+                        </div>
+                        <% }); %>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } %>
+</main>
+<%- include('../includes/end.ejs') %>

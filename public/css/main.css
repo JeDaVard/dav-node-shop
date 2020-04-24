@@ -19,8 +19,22 @@ form {
   display: inline;
 }
 
+hr {
+  border: .1px dashed rgba(0, 0, 0, 0.24);
+  margin: 1.4rem auto;
+  width: 60%;
+}
+
 .centered {
   text-align: center;
+}
+
+.image {
+  height: 20rem;
+}
+
+.image img {
+  height: 100%;
 }
 
 .main-header {
@@ -141,12 +155,13 @@ form {
 .grid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: stretch;
 }
 
 .card {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  background: rgba(238, 238, 238, 0.8);
+  border-radius: 12px;
 }
 
 .card__header,
@@ -194,6 +209,17 @@ form {
 .btn:hover,
 .btn:active {
   background-color: #00695c;
+  color: white;
+}
+
+.btn.danger {
+  color: red;
+  border-color: red;
+}
+
+.btn.danger:hover,
+.btn.danger:active {
+  background: red;
   color: white;
 }
 

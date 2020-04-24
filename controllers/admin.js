@@ -11,14 +11,13 @@ exports.getAddProduct = (req, res, next) => {
 exports.postAddProduct = async (req, res, next) => {
     try {
         const { title, price, imageUrl, description } = req.body;
-        console.log(price);
-        await Product.create({
+        await req.user.createProduct({
             title,
             price,
             imageUrl,
             description,
-        });
-
+            userId: req.user.id
+        })
         res.redirect('/');
     } catch (e) {
         console.log(e);
@@ -31,17 +30,17 @@ exports.getEditProduct = async (req, res, next) => {
         if (!editMode) {
             return res.redirect('/');
         }
-        const prodId = req.params.productId;
-        const product = await Product.findByPk(prodId);
+        const id = req.params.productId;
+        const products = await req.user.getProducts({where: { id }})
 
-        if (!product) {
+        if (!products[0]) {
             return res.redirect('/');
         }
         res.render('admin/edit-product', {
             pageTitle: 'Edit Product',
             path: '/admin/edit-product',
             editing: editMode,
-            product,
+            products: products[0]
         });
     } catch (e) {
         console.log(e);
@@ -65,7 +64,7 @@ exports.postEditProduct = async (req, res, next) => {
 
 exports.getProducts = async (req, res, next) => {
     try {
-        const products = await Product.findAll();
+        const products = await req.user.getProducts();
 
         res.render('admin/products', {
             prods: products,

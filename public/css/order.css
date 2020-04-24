@@ -1,0 +1,41 @@
+
+.order {
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    margin: 1rem auto;
+    padding: 1rem;
+    background: rgba(238, 238, 238, 0.61);
+}
+
+.order__top {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.25);
+    margin-top: -10px;
+    padding: .5rem;
+}
+
+.order__top-date {
+    font-size: 14px;
+    opacity: .7;
+}
+.order__top-id {
+    font-size: 12px;
+    opacity: .3;
+}
+
+.order__bottom {
+    padding: 1rem;
+}
+
+.order__bottom-order {
+    opacity: .8;
+    padding: .2rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.order__bottom-order:not(:last-of-type) {
+    border-bottom: 1px dotted rgba(0, 0, 0, 0.23);
+}
