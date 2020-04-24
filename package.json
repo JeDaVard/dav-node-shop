@@ -16,6 +16,7 @@
     "prettier": "^2.0.5"
   },
   "dependencies": {
+    "acorn": "^7.1.1",
     "ejs": "^3.0.2",
     "express": "^4.17.1",
     "express-handlebars": "^4.0.3",
