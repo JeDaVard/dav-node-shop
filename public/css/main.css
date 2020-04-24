@@ -163,7 +163,13 @@ hr {
   background: rgba(238, 238, 238, 0.8);
   border-radius: 12px;
 }
-
+.main-header__nav {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 .card__header,
 .card__content {
   padding: 1rem;

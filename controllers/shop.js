@@ -3,23 +3,22 @@ const Order = require('../models/order');
 
 exports.getProducts = async (req, res, next) => {
     try {
-        const products = await Product.findAll();
-
+        const products = await Product.find();
         res.render('shop/product-list', {
             prods: products,
             pageTitle: 'All Products',
             path: '/products',
         });
     } catch (e) {
-        console.log(e);
+        console.log();
     }
 };
 
 exports.getProduct = async (req, res, next) => {
-    try {
-        const prodId = req.params.productId;
+    const id = req.params.productId;
 
-        const product = await Product.findByPk(prodId);
+    try {
+        const product = await Product.findById(id);
 
         res.render('shop/product-detail', {
             product: product,
@@ -33,8 +32,7 @@ exports.getProduct = async (req, res, next) => {
 
 exports.getIndex = async (req, res, next) => {
     try {
-        const products = await Product.findAll();
-
+        const products = await Product.find();
         res.render('shop/index', {
             prods: products,
             pageTitle: 'Shop',
@@ -47,13 +45,14 @@ exports.getIndex = async (req, res, next) => {
 
 exports.getCart = async (req, res, next) => {
     try {
-        const cart = await req.user.getCart();
-        const products = await cart.getProducts();
-
+        const user = await req.user
+            .populate('cart.items.productId')
+            .execPopulate();
+        const products = user.cart.items;
         res.render('shop/cart', {
             path: '/cart',
             pageTitle: 'Your Cart',
-            products,
+            products: products,
         });
     } catch (e) {
         console.log(e);
@@ -61,28 +60,10 @@ exports.getCart = async (req, res, next) => {
 };
 
 exports.postCart = async (req, res, next) => {
-    const id = req.body.productId;
-    let fetchedCart;
-
     try {
-        const cart = await req.user.getCart();
-        fetchedCart = cart;
-        const products = await cart.getProducts({ where: { id } });
-
-        console.log()
-
-        let existingProduct;
-        if (products[0]) {
-            existingProduct = products[0];
-            const newQuantity =
-                existingProduct.dataValues.cartItem.dataValues.quantity + 1;
-            fetchedCart.addProduct(existingProduct, {
-                through: { quantity: newQuantity },
-            });
-        } else {
-            const prod = await Product.findByPk(id);
-            fetchedCart.addProduct(prod, { through: { quantity: 1 } });
-        }
+        const id = req.body.productId;
+        const product = await Product.findById(id);
+        await req.user.addToCart(product);
 
         res.redirect('/cart');
     } catch (e) {
@@ -91,47 +72,46 @@ exports.postCart = async (req, res, next) => {
 };
 
 exports.postCartDeleteProduct = async (req, res, next) => {
-    const id = req.body.productId;
     try {
-        const cart = await req.user.getCart();
-        const [product] = await cart.getProducts({ where: { id } });
-
-        await product.dataValues.cartItem.destroy()
-
+        const id = req.body.productId;
+        await req.user.removeFromCart(id)
         res.redirect('/cart');
     } catch (e) {
-        console.log(e);
+        console.log(e)
     }
 };
 
 exports.postOrder = async (req, res, next) => {
     try {
-        const cart = await req.user.getCart();
-        let fetchedCart = cart;
-        const products = await cart.getProducts();
-        const newOrder = await req.user.createOrder();
-        await newOrder.addProducts(products.map( prod => {
-            prod.orderItem = { quantity: prod.cartItem.quantity };
-            return prod
-        }));
-
-        fetchedCart.setProducts(null)
-
+        const user = await req.user.populate('cart.items.productId').execPopulate();
+        const products = user.cart.items.map((i) => {
+            return {
+                quantity: i.quantity,
+                product: { ...i.productId._doc },
+            };
+        });
+        const order = await new Order({
+            user: {
+                name: req.user.name,
+                userId: req.user,
+            },
+            products: products,
+        });
+        await order.save();
+        req.user.clearCart();
         res.redirect('/orders');
     } catch (e) {
         console.log(e)
     }
-
 };
 
 exports.getOrders = async (req, res, next) => {
     try {
-        const orders = await req.user.getOrders({include: ['products']});
-
+        const orders = await Order.find({ 'user.userId': req.user._id });
         res.render('shop/orders', {
             path: '/orders',
             pageTitle: 'Your Orders',
-            orders
+            orders: orders,
         });
     } catch (e) {
         console.log(e)

@@ -13,17 +13,17 @@
                 <div class="order">
                     <div class="order__top">
                         <div class="order__top-date">
-                            <%= new Date(order.createdAt).getTime() %>
+                            later date
                         </div>
                         <div class="order__top-id">
-                            Order ID: <%= order.id %>
+                            Order ID: <%= order._id %>
                         </div>
                     </div>
                     <div class="order__bottom">
                         <% order.products.forEach(product => { %>
                         <div class="order__bottom-order">
-                            <p><%= product.title %></p>
-                            <p><b><%= product.orderItem.quantity %></b></p>
+                            <p><%= product.product.title %></p>
+                            <p><b><%= product.quantity %></b></p>
                         </div>
                         <% }); %>
                     </div>

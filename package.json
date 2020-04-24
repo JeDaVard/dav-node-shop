@@ -20,8 +20,6 @@
     "ejs": "^3.0.2",
     "express": "^4.17.1",
     "express-handlebars": "^4.0.3",
-    "mysql2": "^2.1.0",
-    "pug": "^2.0.4",
-    "sequelize": "^5.21.7"
+    "mongoose": "^5.9.10"
   }
 }
