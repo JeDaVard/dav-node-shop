@@ -12,7 +12,7 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
-const errorController = require('./controllers/error')
+const errorController = require('./controllers/error');
 
 // Template engine
 app.set('view engine', 'ejs');
@@ -24,14 +24,13 @@ app.use(express.urlencoded({ extended: false }));
 // Static root
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 app.use((req, res, next) => {
     User.findById('5ea312cf7b07b800c7e871e1')
-        .then(user => {
+        .then((user) => {
             req.user = user;
             next();
         })
-        .catch(err => console.log(err));
+        .catch((err) => console.log(err));
 });
 
 // Routing middleware
@@ -40,28 +39,32 @@ app.use(authRoutes);
 app.use(shopRoutes);
 app.use(errorController.get404);
 
-
 mongoose
     .connect(
         'mongodb+srv://davit:vardanyan@cluster0-sfzxj.mongodb.net/test?retryWrites=true&w=majority',
-        { useNewUrlParser: true, useUnifiedTopology: true }
+        {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useFindAndModify: false,
+            useCreateIndex: true,
+        }
     )
     .then(() => {
-        User.findOne().then(user => {
+        User.findOne().then((user) => {
             if (!user) {
                 const user = new User({
                     name: 'Max',
                     email: 'max@test.com',
                     cart: {
-                        items: []
-                    }
+                        items: [],
+                    },
                 });
                 user.save();
             }
         });
     })
-    .catch(err => {
+    .catch((err) => {
         console.log(err);
     });
 
-module.exports = app
+module.exports = app;
