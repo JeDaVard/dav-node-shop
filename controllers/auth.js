@@ -7,7 +7,6 @@ exports.getLogin = (req, res) => {
         path: '/login',
         isAuthenticated: false,
         pageTitle: 'login',
-
     });
 };
 exports.postLogin = async (req, res) => {
@@ -15,7 +14,7 @@ exports.postLogin = async (req, res) => {
         const { email, password } = req.body;
 
         const user = await User.findOne({email});
-        const isMatched = await user.comparePasswords(password, user.password)
+        const isMatched = await user.comparePasswords(password, user.password);
 
         if (isMatched) {
             req.session.isLoggedIn=true
