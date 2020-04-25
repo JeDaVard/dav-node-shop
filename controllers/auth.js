@@ -14,23 +14,17 @@ exports.postLogin = async (req, res) => {
         const { email, password } = req.body;
 
         const user = await User.findOne({email});
-        const isMatched = await user.comparePasswords(password, user.password);
 
-        if (isMatched) {
-            req.session.isLoggedIn=true
-            req.session.user = user
-            res.redirect('/');
-        } else {
-            req.session.isLoggedIn=false
-            req.session.user = null
-        }
+        req.session.isLoggedIn = await user.comparePasswords(password, user.password)
+        req.session.user = user || null;
+        res.redirect('/')
     } catch (e) {
         console.log(e)
     }
 };
 
 
-exports.postLogout = (req, res, next) => {
+exports.postLogout = (req, res) => {
     req.session.destroy(err => {
         console.log(err);
         res.redirect('/');
