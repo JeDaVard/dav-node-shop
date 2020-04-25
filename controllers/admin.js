@@ -3,7 +3,7 @@ const Product = require('../models/product');
 exports.getAddProduct = (req, res) => {
     res.render('admin/edit-product', {
         pageTitle: 'Add Product',
-        isAuthenticated: req.session.isLoggedIn,
+
         path: '/admin/add-product',
         editing: false,
     });
@@ -72,7 +72,7 @@ exports.getProducts = async (req, res) => {
 
         res.render('admin/products', {
             prods: products,
-            isAuthenticated: req.session.isLoggedIn,
+
             pageTitle: 'Admin Products',
             path: '/admin/products',
         });

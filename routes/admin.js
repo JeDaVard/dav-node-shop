@@ -1,7 +1,10 @@
 const express = require('express');
 const adminController = require('../controllers/admin');
+const authController = require('../controllers/auth');
 
 const router = express.Router();
+
+router.use(authController.protectRoutes)
 
 router.route('/add-product')
     .get(adminController.getAddProduct)

@@ -7,11 +7,11 @@ exports.getProducts = async (req, res) => {
         res.render('shop/product-list', {
             prods: products,
             pageTitle: 'All Products',
-            isAuthenticated: req.session.isLoggedIn,
+
             path: '/products',
         });
     } catch (e) {
-        console.log();
+        console.log(e);
     }
 };
 
@@ -24,7 +24,7 @@ exports.getProduct = async (req, res) => {
         res.render('shop/product-detail', {
             product: product,
             pageTitle: product.title,
-            isAuthenticated: req.session.isLoggedIn,
+
             path: '/products',
         });
     } catch (e) {
@@ -38,8 +38,9 @@ exports.getIndex = async (req, res) => {
         res.render('shop/index', {
             prods: products,
             pageTitle: 'Shop',
-            isAuthenticated: req.session.isLoggedIn,
+
             path: '/',
+
         });
     } catch (e) {
         console.log(e);
@@ -54,7 +55,7 @@ exports.getCart = async (req, res) => {
         const products = user.cart.items;
         res.render('shop/cart', {
             path: '/cart',
-            isAuthenticated: req.session.isLoggedIn,
+
             pageTitle: 'Your Cart',
             products: products,
         });
@@ -114,7 +115,7 @@ exports.getOrders = async (req, res) => {
         const orders = await Order.find({ 'user.userId': req.user._id });
         res.render('shop/orders', {
             path: '/orders',
-            isAuthenticated: req.session.isLoggedIn,
+
             pageTitle: 'Your Orders',
             orders: orders,
         });

@@ -7,6 +7,7 @@ exports.getLogin = (req, res) => {
         path: '/login',
         isAuthenticated: false,
         pageTitle: 'login',
+
     });
 };
 exports.postLogin = async (req, res) => {
@@ -29,18 +30,20 @@ exports.postLogin = async (req, res) => {
     }
 };
 
-exports.postLogout = async (req, res) => {
-    await req.session.destroy(e => {
-        console.log(e);
+
+exports.postLogout = (req, res, next) => {
+    req.session.destroy(err => {
+        console.log(err);
+        res.redirect('/');
     });
-    res.redirect('/');
-}
+};
+
 
 exports.getSignup = async (req, res) => {
     res.render('auth/signup', {
         path: '/signup',
         pageTitle: 'Signup',
-        isAuthenticated: false
+        isAuthenticated: false,
     });
 };
 
@@ -55,3 +58,11 @@ exports.postSignup = async (req, res, next) => {
         console.log(e)
     }
 };
+
+exports.protectRoutes = (req, res, next) => {
+    if (!req.session.isLoggedIn) {
+        return res.redirect('/login')
+    }
+
+    next()
+}

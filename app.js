@@ -1,6 +1,8 @@
 const path = require('path');
 
 const express = require('express');
+const csrf = require('csurf');
+const csrfProtection = csrf();
 
 const mongoose = require('mongoose');
 // const cookieParser = require('cookie-parser');
@@ -34,7 +36,14 @@ app.use(session({secret: 'mysecret', resave: false, saveUninitialized: false, st
 app.use(express.urlencoded({ extended: false }));
 // Static root
 app.use(express.static(path.join(__dirname, 'public')));
-
+// csrf protection
+app.use(csrfProtection)
+// Auth middleware
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next()
+})
 
 app.use(async (req, res, next) => {
     if (!req.session.user) return next();
