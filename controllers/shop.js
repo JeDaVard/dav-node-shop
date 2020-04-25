@@ -1,12 +1,13 @@
 const Product = require('../models/product');
 const Order = require('../models/order');
 
-exports.getProducts = async (req, res, next) => {
+exports.getProducts = async (req, res) => {
     try {
         const products = await Product.find();
         res.render('shop/product-list', {
             prods: products,
             pageTitle: 'All Products',
+            isAuthenticated: req.session.isLoggedIn,
             path: '/products',
         });
     } catch (e) {
@@ -14,7 +15,7 @@ exports.getProducts = async (req, res, next) => {
     }
 };
 
-exports.getProduct = async (req, res, next) => {
+exports.getProduct = async (req, res) => {
     const id = req.params.productId;
 
     try {
@@ -23,6 +24,7 @@ exports.getProduct = async (req, res, next) => {
         res.render('shop/product-detail', {
             product: product,
             pageTitle: product.title,
+            isAuthenticated: req.session.isLoggedIn,
             path: '/products',
         });
     } catch (e) {
@@ -30,12 +32,13 @@ exports.getProduct = async (req, res, next) => {
     }
 };
 
-exports.getIndex = async (req, res, next) => {
+exports.getIndex = async (req, res) => {
     try {
         const products = await Product.find();
         res.render('shop/index', {
             prods: products,
             pageTitle: 'Shop',
+            isAuthenticated: req.session.isLoggedIn,
             path: '/',
         });
     } catch (e) {
@@ -43,7 +46,7 @@ exports.getIndex = async (req, res, next) => {
     }
 };
 
-exports.getCart = async (req, res, next) => {
+exports.getCart = async (req, res) => {
     try {
         const user = await req.user
             .populate('cart.items.productId')
@@ -51,6 +54,7 @@ exports.getCart = async (req, res, next) => {
         const products = user.cart.items;
         res.render('shop/cart', {
             path: '/cart',
+            isAuthenticated: req.session.isLoggedIn,
             pageTitle: 'Your Cart',
             products: products,
         });
@@ -59,7 +63,7 @@ exports.getCart = async (req, res, next) => {
     }
 };
 
-exports.postCart = async (req, res, next) => {
+exports.postCart = async (req, res) => {
     try {
         const id = req.body.productId;
         const product = await Product.findById(id);
@@ -71,7 +75,7 @@ exports.postCart = async (req, res, next) => {
     }
 };
 
-exports.postCartDeleteProduct = async (req, res, next) => {
+exports.postCartDeleteProduct = async (req, res) => {
     try {
         const id = req.body.productId;
         await req.user.removeFromCart(id)
@@ -81,7 +85,7 @@ exports.postCartDeleteProduct = async (req, res, next) => {
     }
 };
 
-exports.postOrder = async (req, res, next) => {
+exports.postOrder = async (req, res) => {
     try {
         const user = await req.user.populate('cart.items.productId').execPopulate();
         const products = user.cart.items.map((i) => {
@@ -105,11 +109,12 @@ exports.postOrder = async (req, res, next) => {
     }
 };
 
-exports.getOrders = async (req, res, next) => {
+exports.getOrders = async (req, res) => {
     try {
         const orders = await Order.find({ 'user.userId': req.user._id });
         res.render('shop/orders', {
             path: '/orders',
+            isAuthenticated: req.session.isLoggedIn,
             pageTitle: 'Your Orders',
             orders: orders,
         });

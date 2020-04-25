@@ -1,14 +1,15 @@
 const Product = require('../models/product');
 
-exports.getAddProduct = (req, res, next) => {
+exports.getAddProduct = (req, res) => {
     res.render('admin/edit-product', {
         pageTitle: 'Add Product',
+        isAuthenticated: req.session.isLoggedIn,
         path: '/admin/add-product',
         editing: false,
     });
 };
 
-exports.postAddProduct = async (req, res, next) => {
+exports.postAddProduct = async (req, res) => {
     const { title, imageUrl, price, description } = req.body;
     const userId = req.user;
 
@@ -28,7 +29,7 @@ exports.postAddProduct = async (req, res, next) => {
     }
 };
 
-exports.getEditProduct = async (req, res, next) => {
+exports.getEditProduct = async (req, res) => {
     const prodId = req.params.productId;
     const editMode = req.query.edit;
     if (!editMode) return res.redirect('/');
@@ -48,7 +49,7 @@ exports.getEditProduct = async (req, res, next) => {
     }
 };
 
-exports.postEditProduct = async (req, res, next) => {
+exports.postEditProduct = async (req, res) => {
     const { prodId, title, price, imageUrl, description } = req.body;
 
     try {
@@ -65,12 +66,13 @@ exports.postEditProduct = async (req, res, next) => {
     }
 };
 
-exports.getProducts = async (req, res, next) => {
+exports.getProducts = async (req, res) => {
     try {
         const products = await Product.find();
 
         res.render('admin/products', {
             prods: products,
+            isAuthenticated: req.session.isLoggedIn,
             pageTitle: 'Admin Products',
             path: '/admin/products',
         });
@@ -79,7 +81,7 @@ exports.getProducts = async (req, res, next) => {
     }
 };
 
-exports.postDeleteProduct = (req, res, next) => {
+exports.postDeleteProduct = (req, res) => {
     const id = req.body.productId;
     try {
         Product.findByIdAndRemove(id)

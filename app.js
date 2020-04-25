@@ -2,36 +2,45 @@ const path = require('path');
 
 const express = require('express');
 
-const app = express();
 const mongoose = require('mongoose');
-
+// const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+const errorController = require('./controllers/error');
 const User = require('./models/user');
+
+const app = express();
+const store = new MongoDBStore({
+    uri: 'mongodb+srv://davit:vardanyan@cluster0-sfzxj.mongodb.net/test?retryWrites=true&w=majority',
+    collection: 'sessions'
+});
 
 // Route requirement
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
-const errorController = require('./controllers/error');
 
 // Template engine
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
+// Cookie parser
+// app.use(cookieParser())
+// Session
+app.use(session({secret: 'mysecret', resave: false, saveUninitialized: false, store}))
 // express default bodyParser
 // app.use(express.json())
 app.use(express.urlencoded({ extended: false }));
 // Static root
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use((req, res, next) => {
-    User.findById('5ea312cf7b07b800c7e871e1')
-        .then((user) => {
-            req.user = user;
-            next();
-        })
-        .catch((err) => console.log(err));
-});
+
+app.use(async (req, res, next) => {
+    if (!req.session.user) return next();
+    req.user = await User.findById(req.session.user._id)
+    next()
+})
 
 // Routing middleware
 app.use('/admin', adminRoutes);
@@ -53,8 +62,8 @@ mongoose
         User.findOne().then((user) => {
             if (!user) {
                 const user = new User({
-                    name: 'Max',
-                    email: 'max@test.com',
+                    name: 'David',
+                    email: 'dav@test.com',
                     cart: {
                         items: [],
                     },
