@@ -2,6 +2,7 @@
   <dictionary name="davitvardanyan">
     <words>
       <w>csrf</w>
+      <w>multer</w>
       <w>sequelize</w>
       <w>signup</w>
     </words>

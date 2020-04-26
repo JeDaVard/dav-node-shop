@@ -17,12 +17,13 @@ exports.postLogin = async (req, res) => {
 
         req.session.isLoggedIn = await user.comparePasswords(password, user.password)
         req.session.user = user || null;
-        res.redirect('/')
+        req.session.save(() => {
+            res.redirect(req.session.isLoggedIn ? '/' : '/login')
+        })
     } catch (e) {
         console.log(e)
     }
 };
-
 
 exports.postLogout = (req, res) => {
     req.session.destroy(err => {

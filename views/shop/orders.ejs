@@ -19,13 +19,17 @@
                             Order ID: <%= order._id %>
                         </div>
                     </div>
-                    <div class="order__bottom">
+                    <div class="order__middle">
                         <% order.products.forEach(product => { %>
-                        <div class="order__bottom-order">
+                        <div class="order__middle-order">
                             <p><%= product.product.title %></p>
                             <p><b><%= product.quantity %></b></p>
                         </div>
                         <% }); %>
+                    </div>
+                    <div class="order_bottom">
+                        <p>Invoice: <a href="/orders/<%= order._id %>"><i>view | download</i></a></p>
+                        <h4>Price: $<%= order.amount %></h4>
                     </div>
                 </div>
             <% }); %>

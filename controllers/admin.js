@@ -10,7 +10,8 @@ exports.getAddProduct = (req, res) => {
 };
 
 exports.postAddProduct = async (req, res) => {
-    const { title, imageUrl, price, description } = req.body;
+    const { title, price, description } = req.body;
+    const image = req.file
     const userId = req.user;
 
     try {
@@ -18,7 +19,7 @@ exports.postAddProduct = async (req, res) => {
             title,
             price,
             description,
-            imageUrl,
+            imageUrl: image.path,
             userId,
         });
         await product.save();
@@ -50,15 +51,18 @@ exports.getEditProduct = async (req, res) => {
 };
 
 exports.postEditProduct = async (req, res) => {
-    const { prodId, title, price, imageUrl, description } = req.body;
+    const { productId, title, price, description } = req.body;
+    const image = req.file
 
     try {
-        await Product.findByIdAndUpdate(prodId, {
-            title,
-            price,
-            imageUrl,
-            description,
-        });
+        const product = await Product.findById(productId);
+
+        product.title = title;
+        product.price = price;
+        product.description = description;
+        if (image) product.imageUrl = image.path;
+
+        await product.save()
 
         res.redirect('/admin/products');
     } catch (e) {
@@ -81,10 +85,10 @@ exports.getProducts = async (req, res) => {
     }
 };
 
-exports.postDeleteProduct = (req, res) => {
+exports.postDeleteProduct = async (req, res) => {
     const id = req.body.productId;
     try {
-        Product.findByIdAndRemove(id)
+        await Product.findByIdAndRemove(id)
         res.redirect('/admin/products');
     } catch (e) {
         console.log(e)

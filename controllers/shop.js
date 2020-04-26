@@ -1,5 +1,7 @@
 const Product = require('../models/product');
 const Order = require('../models/order');
+const fs = require('fs');
+const path = require('path');
 
 exports.getProducts = async (req, res) => {
     try {
@@ -31,6 +33,7 @@ exports.getProduct = async (req, res) => {
         console.log(e);
     }
 };
+
 
 exports.getIndex = async (req, res) => {
     try {
@@ -95,12 +98,18 @@ exports.postOrder = async (req, res) => {
                 product: { ...i.productId._doc },
             };
         });
+
+        const amount = products.map( prod => {
+            return prod.quantity * prod.product.price
+        }).reduce((sum, cur) => sum + cur, 0);
+
         const order = await new Order({
             user: {
                 name: req.user.name,
                 userId: req.user,
             },
             products: products,
+            amount
         });
         await order.save();
         req.user.clearCart();
@@ -113,6 +122,7 @@ exports.postOrder = async (req, res) => {
 exports.getOrders = async (req, res) => {
     try {
         const orders = await Order.find({ 'user.userId': req.user._id });
+        console.log(orders[0].products)
         res.render('shop/orders', {
             path: '/orders',
 
@@ -123,3 +133,18 @@ exports.getOrders = async (req, res) => {
         console.log(e)
     }
 };
+
+exports.getInvoice = async (req, res, next) => {
+    try {
+        const id = req.params.orderId;
+        const invoiceName = 'invoice-'+id+'.pdf';
+        const invoicePath = path.join('data', 'invoices', invoiceName);
+
+        fs.readFile(invoicePath, (err, data) => {
+            if (err) return next(err);
+            res.send(data)
+        })
+    } catch (e) {
+        console.log(e);
+    }
+}
