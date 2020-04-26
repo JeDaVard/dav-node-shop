@@ -16,7 +16,11 @@
                             later date
                         </div>
                         <div class="order__top-id">
-                            Order ID: <%= order._id %>
+                            Order ID: <%= order._id %> |
+                            <form action="/orders/<%= order._id %>" method="POST">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <button style="color: black" type="submit"><b>REMOVE</b></button>
+                            </form>
                         </div>
                     </div>
                     <div class="order__middle">

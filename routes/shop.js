@@ -18,6 +18,7 @@ router.post('/create-order', shopController.postOrder);
 
 router.use(authController.protectRoutes)
 router.get('/orders', shopController.getOrders);
+router.post('/orders/:orderId', shopController.removeOrder);
 router.get('/orders/:orderId', shopController.getInvoice);
 
 module.exports = router;
