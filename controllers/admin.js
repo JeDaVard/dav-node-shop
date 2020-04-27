@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const { perPage } = require('./shop');
 
 exports.getAddProduct = (req, res) => {
     res.render('admin/edit-product', {
@@ -72,11 +73,22 @@ exports.postEditProduct = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
     try {
-        const products = await Product.find();
+        const page = +req.query.page || 1;
+
+        const totalItemsCount = await Product.find().countDocuments()
+
+        const products = await Product.find()
+            .skip((page - 1) * perPage)
+            .limit(perPage);
 
         res.render('admin/products', {
             prods: products,
-
+            currentPage: page,
+            hasNextPage: perPage * page < totalItemsCount,
+            hasPreviousPage: page > 1,
+            nextPage: page + 1,
+            previousPage: page - 1,
+            lastPage: Math.ceil(totalItemsCount / perPage),
             pageTitle: 'Admin Products',
             path: '/admin/products',
         });

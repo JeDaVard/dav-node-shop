@@ -4,13 +4,27 @@ const fs = require('fs');
 const path = require('path');
 const PDFDocument = require('pdfkit');
 
+const perPage = 4;
+exports.perPage = perPage;
+
 exports.getProducts = async (req, res) => {
     try {
-        const products = await Product.find();
+        const page = +req.query.page || 1;
+
+        const totalItemsCount = await Product.find().countDocuments()
+
+        const products = await Product.find()
+            .skip((page - 1) * perPage)
+            .limit(perPage);
         res.render('shop/product-list', {
             prods: products,
             pageTitle: 'All Products',
-
+            currentPage: page,
+            hasNextPage: perPage * page < totalItemsCount,
+            hasPreviousPage: page > 1,
+            nextPage: page + 1,
+            previousPage: page - 1,
+            lastPage: Math.ceil(totalItemsCount / perPage),
             path: '/products',
         });
     } catch (e) {
@@ -27,7 +41,6 @@ exports.getProduct = async (req, res) => {
         res.render('shop/product-detail', {
             product: product,
             pageTitle: product.title,
-
             path: '/products',
         });
     } catch (e) {
@@ -35,16 +48,25 @@ exports.getProduct = async (req, res) => {
     }
 };
 
-
 exports.getIndex = async (req, res) => {
     try {
-        const products = await Product.find();
+        const page = +req.query.page || 1;
+
+        const totalItemsCount = await Product.find().countDocuments()
+
+        const products = await Product.find()
+            .skip((page - 1) * perPage)
+            .limit(perPage);
         res.render('shop/index', {
             prods: products,
+            currentPage: page,
+            hasNextPage: perPage * page < totalItemsCount,
+            hasPreviousPage: page > 1,
+            nextPage: page + 1,
+            previousPage: page - 1,
+            lastPage: Math.ceil(totalItemsCount / perPage),
             pageTitle: 'Shop',
-
             path: '/',
-
         });
     } catch (e) {
         console.log(e);
@@ -83,16 +105,18 @@ exports.postCart = async (req, res) => {
 exports.postCartDeleteProduct = async (req, res) => {
     try {
         const id = req.body.productId;
-        await req.user.removeFromCart(id)
+        await req.user.removeFromCart(id);
         res.redirect('/cart');
     } catch (e) {
-        console.log(e)
+        console.log(e);
     }
 };
 
 exports.postOrder = async (req, res) => {
     try {
-        const user = await req.user.populate('cart.items.productId').execPopulate();
+        const user = await req.user
+            .populate('cart.items.productId')
+            .execPopulate();
         const products = user.cart.items.map((i) => {
             return {
                 quantity: i.quantity,
@@ -100,9 +124,11 @@ exports.postOrder = async (req, res) => {
             };
         });
 
-        const amount = products.map( prod => {
-            return prod.quantity * prod.product.price
-        }).reduce((sum, cur) => sum + cur, 0);
+        const amount = products
+            .map((prod) => {
+                return prod.quantity * prod.product.price;
+            })
+            .reduce((sum, cur) => sum + cur, 0);
 
         const order = await new Order({
             user: {
@@ -110,13 +136,13 @@ exports.postOrder = async (req, res) => {
                 userId: req.user,
             },
             products: products,
-            amount
+            amount,
         });
         await order.save();
         req.user.clearCart();
         res.redirect('/orders');
     } catch (e) {
-        console.log(e)
+        console.log(e);
     }
 };
 
@@ -131,7 +157,7 @@ exports.getOrders = async (req, res) => {
             orders: orders,
         });
     } catch (e) {
-        console.log(e)
+        console.log(e);
     }
 };
 
@@ -140,11 +166,11 @@ exports.removeOrder = async (req, res) => {
         const id = req.params.orderId;
         const order = await Order.findById(id);
         await order.removeInvoice(id);
-        await order.delete()
+        await order.delete();
 
         res.redirect('/orders');
     } catch (e) {
-        console.log(e)
+        console.log(e);
     }
 };
 
@@ -153,9 +179,10 @@ exports.getInvoice = async (req, res, next) => {
         const id = req.params.orderId;
         const order = await Order.findById(id);
         if (!order) return res.redirect('/');
-        if (order.user.userId.toString() !== req.user._id.toString()) return res.redirect('/');
+        if (order.user.userId.toString() !== req.user._id.toString())
+            return res.redirect('/');
 
-        const invoiceName = 'invoice-'+id+'.pdf';
+        const invoiceName = 'invoice-' + id + '.pdf';
         const invoicePath = path.join('data', 'invoices', invoiceName);
         // No read, because big files can exceed memory
         // fs.readFile(invoicePath, (err, data) => {
@@ -172,26 +199,29 @@ exports.getInvoice = async (req, res, next) => {
         // this makes the browser understand and open instead of download
         res.setHeader('Content-Type', 'application/pdf');
         // This one helps rename and download the file
-        res.setHeader('Content-Disposition', 'attachment; filename="' + invoiceName+ '"');
+        res.setHeader(
+            'Content-Disposition',
+            'attachment; filename="' + invoiceName + '"'
+        );
         pdfDoc.pipe(fs.createWriteStream(invoicePath));
         pdfDoc.pipe(res);
 
         pdfDoc.fontSize(26).text('Invoice', {
-            underline: true
+            underline: true,
         });
         pdfDoc.text('-----------------------');
         let totalPrice = 0;
-        order.products.forEach(prod => {
+        order.products.forEach((prod) => {
             totalPrice += prod.quantity * prod.product.price;
             pdfDoc
                 .fontSize(14)
                 .text(
                     prod.product.title +
-                    ' - ' +
-                    prod.quantity +
-                    ' x ' +
-                    '$' +
-                    prod.product.price
+                        ' - ' +
+                        prod.quantity +
+                        ' x ' +
+                        '$' +
+                        prod.product.price
                 );
         });
         pdfDoc.text('---');
@@ -200,4 +230,4 @@ exports.getInvoice = async (req, res, next) => {
     } catch (e) {
         console.log(e);
     }
-}
+};
