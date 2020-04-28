@@ -3,6 +3,8 @@ const path = require('path');
 const express = require('express');
 const csrf = require('csurf');
 const csrfProtection = csrf();
+const helmet = require('helmet');
+const compression = require('compression');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
@@ -15,8 +17,7 @@ const User = require('./models/user');
 
 const app = express();
 const store = new MongoDBStore({
-    uri:
-        'mongodb+srv://davit:vardanyan@cluster0-sfzxj.mongodb.net/test?retryWrites=true&w=majority',
+    uri: process.env.MONGO_URI,
     collection: 'sessions',
 });
 
@@ -40,6 +41,7 @@ app.use(
         store,
     })
 );
+
 // express default bodyParser
 // app.use(express.json())
 app.use(express.urlencoded({ extended: false }));
@@ -50,6 +52,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 // csrf protection
 app.use(csrfProtection);
+// helmet (security headers)
+app.use(helmet())
+// compress response size
+app.use(compression())
 // Auth middleware
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.session.isLoggedIn;
@@ -70,15 +76,12 @@ app.use(shopRoutes);
 app.use(errorController.get404);
 
 mongoose
-    .connect(
-        'mongodb+srv://davit:vardanyan@cluster0-sfzxj.mongodb.net/test?retryWrites=true&w=majority',
-        {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            useFindAndModify: false,
-            useCreateIndex: true,
-        }
-    )
+    .connect(process.env.MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useFindAndModify: false,
+        useCreateIndex: true,
+    })
     .then(() => {
         User.findOne().then((user) => {
             if (!user) {
